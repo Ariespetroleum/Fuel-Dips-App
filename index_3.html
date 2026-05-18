@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aries Petroleum — Fuel Dips Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; min-height: 100vh; }
+
+    /* ---- TOP BAR ---- */
+    .topbar { background: #0f1f3d; color: #fff; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar .brand { display: flex; align-items: center; gap: 10px; }
+    .topbar .logo { width: 28px; height: 28px; background: #c8a84b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #0f1f3d; flex-shrink: 0; }
+    .topbar h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.03em; }
+    .topbar .sub { font-size: 11px; color: #c8a84b; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 1px; }
+    .topbar .date { font-size: 13px; color: #8899bb; }
+
+    /* ---- NAV ---- */
+    .nav { display: flex; background: #fff; border-bottom: 1px solid #e5e5e5; overflow-x: auto; }
+    .nav button { padding: 13px 20px; border: none; background: none; font-size: 14px; color: #666; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .nav button.active { color: #0f1f3d; border-bottom-color: #0f1f3d; font-weight: 500; }
+    .nav button:hover:not(.active) { color: #333; background: #f9f9f9; }
+
+    /* ---- PAGES ---- */
+    .page { display: none; padding: 20px; max-width: 960px; margin: 0 auto; }
+    .page.active { display: block; }
+
+    /* ---- ALERTS ---- */
+    .alert-box { background: #fff2f2; border: 1px solid #fca5a5; border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; display: flex; gap: 10px; align-items: flex-start; }
+    .alert-box .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .alert-box p { font-size: 13px; color: #b91c1c; line-height: 1.5; }
+    .alert-box strong { font-weight: 600; }
+
+    /* ---- SUMMARY STATS ---- */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    .stat { background: #fff; border-radius: 10px; padding: 14px; text-align: center; border: 1px solid #e5e5e5; }
+    .stat .num { font-size: 24px; font-weight: 600; color: #1a1a1a; }
+    .stat .num.warn { color: #dc2626; }
+    .stat .lbl { font-size: 11px; color: #888; margin-top: 3px; }
+
+    /* ---- STATION CARDS ---- */
+    .stations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .station-card { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; padding: 16px; }
+    .station-card.alert { border-color: #fca5a5; }
+    .station-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .station-head .name { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+    .station-head .sub { font-size: 11px; color: #999; margin-top: 2px; }
+    .badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .badge.ok { background: #dcfce7; color: #15803d; }
+    .badge.nodata { background: #f3f4f6; color: #9ca3af; }
+    .badge.warn { background: #fee2e2; color: #dc2626; }
+
+    /* ---- TANK ROWS ---- */
+    .tank-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .tank-row:last-child { margin-bottom: 0; }
+    .tank-lbl { font-size: 12px; color: #666; width: 62px; flex-shrink: 0; }
+    .bar-wrap { flex: 1; height: 7px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .bar-fill.ok { background: #22c55e; }
+    .bar-fill.warn { background: #ef4444; }
+    .tank-vol { font-size: 12px; font-weight: 500; min-width: 76px; text-align: right; }
+    .tank-vol.ok { color: #1a1a1a; }
+    .tank-vol.warn { color: #dc2626; }
+    .tank-vol.none { color: #bbb; }
+
+    /* ---- FORM ---- */
+    .form-card { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; padding: 20px; max-width: 520px; }
+    .form-title { font-size: 15px; font-weight: 600; margin-bottom: 18px; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; }
+    select, input[type="number"], input[type="text"] {
+      width: 100%; padding: 9px 12px; font-size: 14px;
+      border: 1px solid #d1d5db; border-radius: 8px;
+      background: #fff; color: #1a1a1a; outline: none;
+      transition: border-color 0.15s;
+    }
+    select:focus, input:focus { border-color: #0f1f3d; }
+    .tanks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .submit-btn {
+      width: 100%; padding: 11px; background: #0f1f3d; color: #fff;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: opacity 0.15s; margin-top: 4px;
+    }
+    .submit-btn:hover { opacity: 0.85; }
+    .success-msg {
+      display: none; margin-top: 12px; padding: 11px 14px;
+      background: #f0fdf4; border: 1px solid #86efac;
+      border-radius: 8px; font-size: 13px; color: #15803d;
+    }
+
+    /* ---- HISTORY ---- */
+    .hist-card { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; padding: 20px; }
+    .hist-row { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .hist-row:last-child { border-bottom: none; }
+    .hist-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .hist-tanks { font-size: 12px; color: #666; line-height: 1.8; }
+    .hist-note { font-size: 12px; color: #aaa; margin-top: 2px; }
+    .no-data { text-align: center; color: #bbb; font-size: 13px; padding: 30px 0; }
+
+    /* ---- SETTINGS ---- */
+    .settings-card { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; padding: 20px; margin-bottom: 14px; }
+    .settings-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+    .warn-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .warn-row input { width: 120px; }
+    .save-btn { padding: 9px 18px; background: #0f1f3d; color: #fff; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; }
+    .save-btn:hover { opacity: 0.85; }
+    .station-list-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    .station-list-row:last-child { border-bottom: none; }
+    .station-list-row .sname { font-weight: 500; }
+    .station-list-row .stanks { color: #888; font-size: 12px; }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .page { padding: 14px; }
+      .tanks-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">A</div>
+    <div>
+      <h1>Aries Petroleum</h1>
+      <div class="sub">Fuel Dips Manager</div>
+    </div>
+  </div>
+  <span class="date" id="top-date"></span>
+</div>
+
+<div class="nav">
+  <button class="active" onclick="switchPage('owner', this)">📊 老板总览</button>
+  <button onclick="switchPage('staff', this)">✏️ 员工登记</button>
+  <button onclick="switchPage('history', this)">📋 历史记录</button>
+  <button onclick="switchPage('settings', this)">⚙️ 设置</button>
+</div>
+
+<div id="page-owner" class="page active"></div>
+<div id="page-staff" class="page"></div>
+<div id="page-history" class="page"></div>
+<div id="page-settings" class="page"></div>
+
+<script>
+// ============================================================
+// 站点配置 — 如需修改站点或油罐，编辑这里
+// ============================================================
+const STATIONS = [
+  { id: 's1', name: 'Sinopec Frankston',     tanks: ['91#', '95#', '98#', '柴油'] },
+  { id: 's2', name: 'Sinopec Thomastown',    tanks: ['91#', 'E10', '98#', '柴油 A', '柴油 B'] },
+  { id: 's3', name: 'Sinopec Shepparton',    tanks: ['91#', '95#', '98#', '柴油'] },
+  { id: 's4', name: 'Sinopec Ballarat',      tanks: ['91#', '95#', '98#', '柴油'] },
+  { id: 's5', name: 'BP Clayton South',      tanks: ['91#', '95#', '98#', '柴油'] },
+  { id: 's6', name: 'BP Flemington',         tanks: ['91#', '98#', '柴油 A', '柴油 B'] },
+  { id: 's7', name: 'Liberty Golden Square', tanks: ['91#', 'E10', '98#', '柴油'] },
+];
+const TANK_MAX = 50000;
+let warnLevel = parseInt(localStorage.getItem('warnLevel') || '10000');
+
+// ============================================================
+// 工具函数
+// ============================================================
+function getToday() {
+  return new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+function tankKey(t) { return 'tank_' + t.replace(/[^a-zA-Z0-9]/g, '_'); }
+function loadData() {
+  try { return JSON.parse(localStorage.getItem('fuel_dips') || '{}'); } catch(e) { return {}; }
+}
+function saveData(d) {
+  localStorage.setItem('fuel_dips', JSON.stringify(d));
+}
+function getLatest(data, sid) {
+  const arr = data[sid]; if (!arr || !arr.length) return null;
+  return arr[arr.length - 1];
+}
+function switchPage(p, btn) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (p === 'owner') renderOwner();
+  if (p === 'staff') renderStaff();
+  if (p === 'history') renderHistory();
+  if (p === 'settings') renderSettings();
+}
+
+// ============================================================
+// 老板总览
+// ============================================================
+function renderOwner() {
+  const data = loadData();
+  const today = getToday();
+  const alerts = [];
+  let totalL = 0, warnCount = 0, reportedToday = 0;
+  let stationsHtml = '';
+
+  STATIONS.forEach(st => {
+    const latest = getLatest(data, st.id);
+    let hasAlert = false;
+    let tanksHtml = '';
+
+    st.tanks.forEach(t => {
+      const vol = latest ? (latest.tanks[t] ?? null) : null;
+      if (vol !== null && vol >= 0) {
+        totalL += vol;
+        const pct = Math.min(100, Math.round(vol / TANK_MAX * 100));
+        const isWarn = vol < warnLevel;
+        if (isWarn) { hasAlert = true; warnCount++; alerts.push({ station: st.name, tank: t, vol }); }
+        tanksHtml += `<div class="tank-row">
+          <span class="tank-lbl">${t}</span>
+          <div class="bar-wrap"><div class="bar-fill ${isWarn ? 'warn' : 'ok'}" style="width:${pct}%"></div></div>
+          <span class="tank-vol ${isWarn ? 'warn' : 'ok'}">${vol.toLocaleString()} L</span>
+        </div>`;
+      } else {
+        tanksHtml += `<div class="tank-row">
+          <span class="tank-lbl">${t}</span>
+          <div class="bar-wrap"><div class="bar-fill ok" style="width:0%"></div></div>
+          <span class="tank-vol none">未登记</span>
+        </div>`;
+      }
+    });
+
+    const isToday = latest && latest.date === today;
+    if (isToday) reportedToday++;
+    const badge = !latest
+      ? `<span class="badge nodata">未登记</span>`
+      : isToday ? `<span class="badge ok">今日 ✓</span>`
+      : `<span class="badge nodata">${latest.date}</span>`;
+    const warnBadge = hasAlert ? ` <span class="badge warn">⚠ 预警</span>` : '';
+
+    stationsHtml += `<div class="station-card ${hasAlert ? 'alert' : ''}">
+      <div class="station-head">
+        <div><div class="name">${st.name}${warnBadge}</div><div class="sub">${st.tanks.length} 个油罐</div></div>
+        ${badge}
+      </div>
+      ${tanksHtml}
+    </div>`;
+  });
+
+  let alertsHtml = alerts.map(a =>
+    `<div class="alert-box">
+      <div class="icon">⚠️</div>
+      <p><strong>${a.station} · ${a.tank}</strong> 仅剩 <strong>${a.vol.toLocaleString()} 升</strong>，已低于 ${warnLevel.toLocaleString()} 升预警线，请尽快安排补油！</p>
+    </div>`
+  ).join('');
+
+  document.getElementById('page-owner').innerHTML = `
+    ${alertsHtml}
+    <div class="stats-grid">
+      <div class="stat"><div class="num">7</div><div class="lbl">监控站点</div></div>
+      <div class="stat"><div class="num">${reportedToday}/7</div><div class="lbl">今日已登记</div></div>
+      <div class="stat"><div class="num ${warnCount > 0 ? 'warn' : ''}">${warnCount}</div><div class="lbl">预警油罐</div></div>
+      <div class="stat"><div class="num">${totalL > 0 ? Math.round(totalL / 1000) + 'K' : '--'}</div><div class="lbl">总库存（升）</div></div>
+    </div>
+    <div class="stations-grid">${stationsHtml}</div>
+  `;
+}
+
+// ============================================================
+// 员工登记
+// ============================================================
+function renderStaff() {
+  const stOptions = STATIONS.map(st => `<option value="${st.id}">${st.name}</option>`).join('');
+  document.getElementById('page-staff').innerHTML = `
+    <div class="form-card">
+      <div class="form-title">每日油量登记（Dips）</div>
+      <div class="form-group">
+        <label>选择加油站</label>
+        <select id="staff-station" onchange="updateTankInputs()">${stOptions}</select>
+      </div>
+      <div class="form-group">
+        <label>登记日期</label>
+        <input type="text" value="${getToday()}" readonly style="background:#f9f9f9;cursor:default;">
+      </div>
+      <div class="form-group">
+        <label>各油罐油量（升）</label>
+        <div id="tanks-inputs" class="tanks-grid"></div>
+      </div>
+      <div class="form-group">
+        <label>备注（选填）</label>
+        <input type="text" id="staff-note" placeholder="如：今日补油、设备异常等">
+      </div>
+      <button class="submit-btn" onclick="submitDips()">提交今日油量登记</button>
+      <div id="success-msg" class="success-msg">✅ 登记成功！数据已保存。</div>
+    </div>`;
+  updateTankInputs();
+}
+
+function updateTankInputs() {
+  const stId = document.getElementById('staff-station').value;
+  const st = STATIONS.find(s => s.id === stId);
+  const data = loadData();
+  const latest = getLatest(data, stId);
+  const container = document.getElementById('tanks-inputs');
+  container.innerHTML = '';
+  st.tanks.forEach(t => {
+    const prev = latest ? (latest.tanks[t] ?? '') : '';
+    container.innerHTML += `<div>
+      <label>${t}</label>
+      <input type="number" id="${tankKey(t)}" placeholder="${prev !== '' ? prev.toLocaleString() : '0'}" min="0" max="99999" step="100">
+    </div>`;
+  });
+}
+
+function submitDips() {
+  const stId = document.getElementById('staff-station').value;
+  const st = STATIONS.find(s => s.id === stId);
+  const note = document.getElementById('staff-note').value;
+  const entry = { date: getToday(), tanks: {}, note };
+  let valid = true;
+  st.tanks.forEach(t => {
+    const el = document.getElementById(tankKey(t));
+    const val = parseFloat(el ? el.value : '');
+    if (isNaN(val) || val < 0) { valid = false; return; }
+    entry.tanks[t] = val;
+  });
+  if (!valid) { alert('请填写所有油罐的油量数值'); return; }
+  const data = loadData();
+  if (!data[stId]) data[stId] = [];
+  data[stId] = data[stId].filter(e => e.date !== entry.date);
+  data[stId].push(entry);
+  saveData(data);
+  const msg = document.getElementById('success-msg');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+  document.getElementById('staff-note').value = '';
+  st.tanks.forEach(t => { const el = document.getElementById(tankKey(t)); if (el) el.value = ''; });
+}
+
+// ============================================================
+// 历史记录
+// ============================================================
+function renderHistory() {
+  const stOptions = STATIONS.map(st => `<option value="${st.id}">${st.name}</option>`).join('');
+  document.getElementById('page-history').innerHTML = `
+    <div class="hist-card">
+      <div class="form-group" style="margin-bottom:14px;">
+        <label>筛选站点</label>
+        <select id="hist-filter" onchange="filterHistory()">
+          <option value="">全部站点</option>
+          ${stOptions}
+        </select>
+      </div>
+      <div id="hist-list"></div>
+    </div>`;
+  filterHistory();
+}
+
+function filterHistory() {
+  const data = loadData();
+  const filter = document.getElementById('hist-filter').value;
+  const rows = [];
+  STATIONS.forEach(st => {
+    if (filter && st.id !== filter) return;
+    (data[st.id] || []).forEach(e => rows.push({ stName: st.name, ...e }));
+  });
+  rows.sort((a, b) => b.date.localeCompare(a.date));
+  const list = document.getElementById('hist-list');
+  if (!rows.length) { list.innerHTML = '<div class="no-data">暂无登记记录</div>'; return; }
+  list.innerHTML = rows.slice(0, 80).map(r => {
+    const tanks = Object.entries(r.tanks).map(([k, v]) => {
+      const w = v < warnLevel;
+      return `<span style="margin-right:10px;${w ? 'color:#dc2626;font-weight:600' : ''}">${k}: ${v.toLocaleString()}L${w ? ' ⚠' : ''}</span>`;
+    }).join('');
+    return `<div class="hist-row">
+      <div class="hist-title">${r.stName} &nbsp;·&nbsp; ${r.date}</div>
+      <div class="hist-tanks">${tanks}</div>
+      ${r.note ? `<div class="hist-note">备注：${r.note}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// 设置
+// ============================================================
+function renderSettings() {
+  document.getElementById('page-settings').innerHTML = `
+    <div class="settings-card">
+      <div class="settings-title">预警线设置</div>
+      <div class="warn-row">
+        <label style="margin:0;white-space:nowrap;">油量低于</label>
+        <input type="number" id="warn-input" value="${warnLevel}" min="1000" max="50000" step="1000" style="width:120px;">
+        <label style="margin:0;">升时预警</label>
+        <button class="save-btn" onclick="saveWarnLevel()">保存</button>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:10px;">当前预警线：${warnLevel.toLocaleString()} 升</p>
+    </div>
+    <div class="settings-card">
+      <div class="settings-title">站点 & 油罐配置</div>
+      ${STATIONS.map(st => `
+        <div class="station-list-row">
+          <span class="sname">${st.name}</span>
+          <span class="stanks">${st.tanks.join(' · ')}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+function saveWarnLevel() {
+  const val = parseInt(document.getElementById('warn-input').value);
+  if (isNaN(val) || val < 0) return;
+  warnLevel = val;
+  localStorage.setItem('warnLevel', val);
+  renderSettings();
+  alert(`✅ 预警线已更新为 ${val.toLocaleString()} 升`);
+}
+
+// ============================================================
+// 初始化
+// ============================================================
+document.getElementById('top-date').textContent = getToday();
+renderOwner();
+</script>
+</body>
+</html>
