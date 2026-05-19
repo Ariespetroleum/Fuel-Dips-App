@@ -6,6 +6,7 @@
 <title>Fuel Dips System</title>
 
 <style>
+
 body{
   font-family:Arial,sans-serif;
   background:#f5f5f5;
@@ -24,22 +25,45 @@ body{
 
 h1{
   margin-top:0;
+  color:#0f1f3d;
+}
+
+h2{
+  color:#0f1f3d;
+  margin-top:0;
+}
+
+.section{
+  margin-bottom:40px;
+  padding-bottom:20px;
+  border-bottom:1px solid #ddd;
+}
+
+label{
+  display:block;
+  margin-top:12px;
+  margin-bottom:4px;
+  font-weight:bold;
 }
 
 input,select,textarea,button{
   width:100%;
   padding:12px;
-  margin-top:8px;
-  margin-bottom:16px;
   border:1px solid #ccc;
   border-radius:8px;
   box-sizing:border-box;
+  font-size:14px;
+}
+
+textarea{
+  min-height:80px;
 }
 
 button{
   background:#0f1f3d;
   color:white;
   border:none;
+  margin-top:20px;
   cursor:pointer;
   font-weight:bold;
 }
@@ -50,11 +74,8 @@ button:hover{
 
 .success{
   color:green;
+  margin-top:12px;
   font-weight:bold;
-}
-
-.section{
-  margin-bottom:40px;
 }
 
 </style>
@@ -64,9 +85,10 @@ button:hover{
 
 <div class="container">
 
-<h1>Fuel Dips System</h1>
+<h1>Fuel Dips & Delivery System</h1>
 
 <div class="section">
+
 <h2>Fuel Dips</h2>
 
 <label>Station</label>
@@ -98,10 +120,18 @@ button:hover{
 <label>Diesel</label>
 <input type="number" id="diesel">
 
+<label>Diesel 1</label>
+<input type="number" id="diesel1">
+
+<label>Diesel 2</label>
+<input type="number" id="diesel2">
+
 <label>Notes</label>
 <textarea id="notes"></textarea>
 
-<button onclick="submitDip()">Submit Fuel Dips</button>
+<button onclick="submitDip()">
+Submit Fuel Dips
+</button>
 
 <div class="success" id="dipResult"></div>
 
@@ -117,25 +147,30 @@ button:hover{
 <label>Docket No</label>
 <input type="text" id="docket">
 
-<label>Product</label>
-<select id="product">
-<option>91</option>
-<option>95</option>
-<option>98</option>
-<option>E10</option>
-<option>Diesel</option>
-</select>
+<label>91 Delivered Litres</label>
+<input type="number" id="d91">
 
-<label>Delivered Litres</label>
-<input type="number" id="delivered">
+<label>95 Delivered Litres</label>
+<input type="number" id="d95">
 
-<label>Tank Before</label>
-<input type="number" id="before">
+<label>98 Delivered Litres</label>
+<input type="number" id="d98">
 
-<label>Tank After</label>
-<input type="number" id="after">
+<label>E10 Delivered Litres</label>
+<input type="number" id="de10">
 
-<button onclick="submitDelivery()">Submit Fuel Delivery</button>
+<label>Diesel 1 Delivered Litres</label>
+<input type="number" id="ddiesel1">
+
+<label>Diesel 2 Delivered Litres</label>
+<input type="number" id="ddiesel2">
+
+<label>Notes</label>
+<textarea id="deliveryNotes"></textarea>
+
+<button onclick="submitDelivery()">
+Submit Fuel Delivery
+</button>
 
 <div class="success" id="deliveryResult"></div>
 
@@ -158,11 +193,15 @@ async function submitDip(){
     date:today(),
     station:document.getElementById("station").value,
     staffName:document.getElementById("staffName").value,
+
     "91":document.getElementById("f91").value,
     "95":document.getElementById("f95").value,
     "98":document.getElementById("f98").value,
     "E10":document.getElementById("e10").value,
     "Diesel":document.getElementById("diesel").value,
+    "Diesel 1":document.getElementById("diesel1").value,
+    "Diesel 2":document.getElementById("diesel2").value,
+
     notes:document.getElementById("notes").value
   };
 
@@ -174,7 +213,9 @@ async function submitDip(){
   const result = await response.json();
 
   document.getElementById("dipResult").innerText =
-    result.success ? "Fuel Dip Submitted Successfully" : result.message;
+    result.success
+      ? "Fuel Dip Submitted Successfully"
+      : result.message;
 }
 
 async function submitDelivery(){
@@ -184,12 +225,18 @@ async function submitDelivery(){
     date:today(),
     station:document.getElementById("station").value,
     staffName:document.getElementById("staffName").value,
+
     supplier:document.getElementById("supplier").value,
     docketNo:document.getElementById("docket").value,
-    product:document.getElementById("product").value,
-    deliveredLitres:document.getElementById("delivered").value,
-    tankBefore:document.getElementById("before").value,
-    tankAfter:document.getElementById("after").value
+
+    "91":document.getElementById("d91").value,
+    "95":document.getElementById("d95").value,
+    "98":document.getElementById("d98").value,
+    "E10":document.getElementById("de10").value,
+    "Diesel 1":document.getElementById("ddiesel1").value,
+    "Diesel 2":document.getElementById("ddiesel2").value,
+
+    notes:document.getElementById("deliveryNotes").value
   };
 
   const response = await fetch(API_URL,{
@@ -200,7 +247,9 @@ async function submitDelivery(){
   const result = await response.json();
 
   document.getElementById("deliveryResult").innerText =
-    result.success ? "Fuel Delivery Submitted Successfully" : result.message;
+    result.success
+      ? "Fuel Delivery Submitted Successfully"
+      : result.message;
 }
 
 </script>
