@@ -3,255 +3,765 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fuel Dips System</title>
-
+<title>Aries Petroleum — Fuel System</title>
 <style>
-
-body{
-  font-family:Arial,sans-serif;
-  background:#f5f5f5;
-  margin:0;
-  padding:20px;
+:root{
+  --navy:#0f1f3d;
+  --gold:#c8a84b;
+  --bg:#f0f2f5;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --danger:#dc2626;
+  --success:#15803d;
+  --border:#e5e7eb;
 }
-
-.container{
-  max-width:700px;
-  margin:auto;
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.1);
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--navy);padding:18px 16px 16px;text-align:center;position:sticky;top:0;z-index:100}
+.logo{width:50px;height:50px;margin:0 auto 8px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800}
+.header h1{color:#fff;font-size:20px;font-weight:700}
+.header p{color:var(--gold);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin:3px 0 10px}
+.lang-row{display:flex;gap:8px;justify-content:center}
+.lang-btn{padding:6px 18px;border:none;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.12);color:#99aac0}
+.lang-btn.active{background:var(--gold);color:var(--navy)}
+.container{max-width:680px;margin:20px auto;padding:0 14px 40px}
+.card{background:var(--card);border-radius:18px;padding:24px 20px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
+h2{font-size:20px;font-weight:700;color:var(--navy);text-align:center;margin-bottom:6px}
+.page-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:20px}
+.progress{display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:22px}
+.ps{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#e9ecef;color:#aaa;flex-shrink:0}
+.ps.active{background:var(--navy);color:#fff}
+.ps.done{background:var(--gold);color:var(--navy)}
+.pl{width:28px;height:2px;background:#e9ecef}
+.pl.done{background:var(--gold)}
+.form-group{margin-bottom:16px}
+label{display:block;font-size:14px;font-weight:600;color:#374151;margin-bottom:6px}
+select,input[type=text],input[type=date],input[type=number],input[type=password],textarea{
+  width:100%;padding:12px 14px;border:1.5px solid var(--border);
+  border-radius:10px;font-size:16px;background:#fff;color:var(--text);
+  outline:none;font-family:inherit;
 }
-
-h1{
-  margin-top:0;
-  color:#0f1f3d;
+select:focus,input:focus,textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(15,31,61,.08)}
+textarea{min-height:80px;resize:vertical}
+.fuel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+.fuel-item label{font-size:13px;font-weight:500;color:#555;margin-bottom:5px}
+.fuel-item input{text-align:right;font-size:17px;font-weight:600;padding-right:10px}
+.fuel-unit{font-size:11px;color:#bbb;text-align:right;margin-top:3px}
+.section-divider{font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.09em;margin:18px 0 12px}
+.type-btn{width:100%;padding:16px 14px;margin-bottom:12px;border:2px solid var(--border);border-radius:14px;background:#fff;cursor:pointer;display:flex;align-items:center;gap:14px;text-align:left}
+.type-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.type-icon.dip{background:#e8f4fd}
+.type-icon.del{background:#fef3e2}
+.type-icon.adm{background:#f0fdf4}
+.t-label{font-size:16px;font-weight:700;color:#1a1a1a}
+.t-desc{font-size:12px;color:#aaa;margin-top:2px}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-secondary{background:#e9ecef;color:#555}
+.error-msg{color:var(--danger);font-size:13px;font-weight:600;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;margin-top:10px;display:none}
+.error-msg.show{display:block}
+.confirm-box{background:#f9fafb;border:1px solid var(--border);border-radius:12px;padding:14px}
+.confirm-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:14px;gap:10px}
+.confirm-row:last-child{border-bottom:none}
+.ck{color:var(--muted);font-weight:500;flex-shrink:0}
+.cv{color:var(--text);font-weight:600;text-align:right}
+.cv.warn{color:var(--danger)}
+.confirm-section{font-size:11px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.08em;padding:10px 0 4px}
+.success-wrap{text-align:center;padding:20px 0 14px}
+.success-icon{font-size:60px;margin-bottom:14px}
+.success-title{font-size:22px;font-weight:700;color:var(--success);margin-bottom:6px}
+.success-sub{font-size:14px;color:var(--muted)}
+.admin-box{background:#f9fafb;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;line-height:1.7;font-size:14px}
+.admin-box b{color:var(--navy)}
+.admin-tag{display:inline-block;background:var(--navy);color:var(--gold);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.06em;vertical-align:middle;margin-left:6px}
+.admin-section-title{font-size:15px;font-weight:800;color:var(--navy);margin:18px 0 8px}
+.admin-item{background:white;border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px;line-height:1.6}
+.admin-date{font-weight:800;color:var(--navy);margin:12px 0 6px}
+.admin-station{font-weight:700;color:#111}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.kpi .num{font-size:20px;font-weight:800;color:var(--navy)}
+.kpi .lbl{font-size:11px;color:var(--muted);margin-top:4px}
+.hidden{display:none!important}
+@media(max-width:480px){
+  .container{padding:0 10px 30px}
+  .card{padding:20px 16px;border-radius:14px}
+  .fuel-grid{grid-template-columns:1fr 1fr}
 }
-
-h2{
-  color:#0f1f3d;
-  margin-top:0;
-}
-
-.section{
-  margin-bottom:40px;
-  padding-bottom:20px;
-  border-bottom:1px solid #ddd;
-}
-
-label{
-  display:block;
-  margin-top:12px;
-  margin-bottom:4px;
-  font-weight:bold;
-}
-
-input,select,textarea,button{
-  width:100%;
-  padding:12px;
-  border:1px solid #ccc;
-  border-radius:8px;
-  box-sizing:border-box;
-  font-size:14px;
-}
-
-textarea{
-  min-height:80px;
-}
-
-button{
-  background:#0f1f3d;
-  color:white;
-  border:none;
-  margin-top:20px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-button:hover{
-  opacity:0.9;
-}
-
-.success{
-  color:green;
-  margin-top:12px;
-  font-weight:bold;
-}
-
 </style>
 </head>
-
 <body>
 
+<div class="header">
+  <div class="logo">A</div>
+  <h1>Aries Petroleum</h1>
+  <p>Fuel Dips &amp; Delivery System</p>
+  <div class="lang-row">
+    <button class="lang-btn active" id="btn-en" onclick="setLang('en')">English</button>
+    <button class="lang-btn" id="btn-zh" onclick="setLang('zh')">中文</button>
+  </div>
+</div>
+
 <div class="container">
+<div class="card">
 
-<h1>Fuel Dips & Delivery System</h1>
-
-<div class="section">
-
-<h2>Fuel Dips</h2>
-
-<label>Station</label>
-<select id="station">
-<option>Sinopec Frankston</option>
-<option>Sinopec Thomastown</option>
-<option>Sinopec Shepparton</option>
-<option>Sinopec Ballarat</option>
-<option>BP Clayton South</option>
-<option>BP Flemington</option>
-<option>Liberty Golden Square</option>
-</select>
-
-<label>Staff Name</label>
-<input type="text" id="staffName">
-
-<label>91</label>
-<input type="number" id="f91">
-
-<label>95</label>
-<input type="number" id="f95">
-
-<label>98</label>
-<input type="number" id="f98">
-
-<label>E10</label>
-<input type="number" id="e10">
-
-<label>Diesel</label>
-<input type="number" id="diesel">
-
-<label>Diesel 1</label>
-<input type="number" id="diesel1">
-
-<label>Diesel 2</label>
-<input type="number" id="diesel2">
-
-<label>Notes</label>
-<textarea id="notes"></textarea>
-
-<button onclick="submitDip()">
-Submit Fuel Dips
-</button>
-
-<div class="success" id="dipResult"></div>
-
+<div id="homePage">
+  <h2 id="homeTitle">Please Select</h2>
+  <p class="page-sub" id="homeSub">Choose what you would like to submit</p>
+  <button class="type-btn" onclick="selectType('fuel_dip')">
+    <div class="type-icon dip">📊</div>
+    <div><div class="t-label" id="btnDips">Fuel Dips</div><div class="t-desc" id="btnDipsDesc">Daily tank readings</div></div>
+  </button>
+  <button class="type-btn" onclick="selectType('fuel_delivery')">
+    <div class="type-icon del">🚛</div>
+    <div><div class="t-label" id="btnDelivery">Fuel Delivery</div><div class="t-desc" id="btnDeliveryDesc">Record incoming fuel</div></div>
+  </button>
+  <button class="type-btn" onclick="showAdminLogin()">
+    <div class="type-icon adm">🔐</div>
+    <div><div class="t-label" id="btnAdmin">Admin</div><div class="t-desc" id="btnAdminDesc">Owner dashboard</div></div>
+  </button>
 </div>
 
-<div class="section">
-
-<h2>Fuel Delivery</h2>
-
-<label>Supplier</label>
-<input type="text" id="supplier">
-
-<label>Docket No</label>
-<input type="text" id="docket">
-
-<label>91 Delivered Litres</label>
-<input type="number" id="d91">
-
-<label>95 Delivered Litres</label>
-<input type="number" id="d95">
-
-<label>98 Delivered Litres</label>
-<input type="number" id="d98">
-
-<label>E10 Delivered Litres</label>
-<input type="number" id="de10">
-
-<label>Diesel 1 Delivered Litres</label>
-<input type="number" id="ddiesel1">
-
-<label>Diesel 2 Delivered Litres</label>
-<input type="number" id="ddiesel2">
-
-<label>Notes</label>
-<textarea id="deliveryNotes"></textarea>
-
-<button onclick="submitDelivery()">
-Submit Fuel Delivery
-</button>
-
-<div class="success" id="deliveryResult"></div>
-
+<div id="stationPage" class="hidden">
+  <div class="progress">
+    <div class="ps done">1</div><div class="pl done"></div>
+    <div class="ps active">2</div><div class="pl"></div>
+    <div class="ps">3</div><div class="pl"></div>
+    <div class="ps">4</div>
+  </div>
+  <h2 id="stationTitle">Select Station</h2>
+  <p class="page-sub" id="stationSub">Choose your station to continue</p>
+  <div class="form-group">
+    <label id="stationLabel">Station</label>
+    <select id="station">
+      <option value="" id="stationPh">— Please select —</option>
+      <option>Sinopec Frankston</option>
+      <option>Sinopec Thomastown</option>
+      <option>Sinopec Shepparton</option>
+      <option>Sinopec Ballarat</option>
+      <option>BP Clayton South</option>
+      <option>BP Flemington</option>
+      <option>Liberty Golden Square</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" onclick="goToForm()" id="nextBtn">Next →</button>
+  <button class="btn btn-secondary" onclick="showPage('homePage')" id="backBtn1">← Back</button>
 </div>
 
+<div id="formPage" class="hidden">
+  <div class="progress">
+    <div class="ps done">1</div><div class="pl done"></div>
+    <div class="ps done">2</div><div class="pl done"></div>
+    <div class="ps active">3</div><div class="pl"></div>
+    <div class="ps">4</div>
+  </div>
+
+  <h2 id="formTitle"></h2>
+  <p class="page-sub" id="formSub"></p>
+
+  <div class="form-group">
+    <label id="lblDate">Date</label>
+    <input type="date" id="date">
+  </div>
+
+  <div class="form-group">
+    <label id="lblStaff">Staff Name</label>
+    <input type="text" id="staffName" placeholder="Enter your full name">
+  </div>
+
+  <div id="deliveryFields" class="hidden">
+    <div class="form-group">
+      <label id="lblSupplier">Supplier</label>
+      <input type="text" id="supplier">
+    </div>
+    <div class="form-group">
+      <label id="lblDocket">Docket No.</label>
+      <input type="text" id="docketNo">
+    </div>
+  </div>
+
+  <div class="section-divider" id="lblReadings">Tank Readings</div>
+  <div id="fuelInputs" class="fuel-grid"></div>
+
+  <div class="form-group" style="margin-top:18px">
+    <label id="lblNotes">Notes (optional)</label>
+    <textarea id="notes"></textarea>
+  </div>
+
+  <div id="formError" class="error-msg"></div>
+  <button class="btn btn-primary" onclick="showConfirm()" id="reviewBtn">Review &amp; Confirm</button>
+  <button class="btn btn-secondary" onclick="showPage('stationPage')" id="backBtn2">← Back</button>
+</div>
+
+<div id="confirmPage" class="hidden">
+  <div class="progress">
+    <div class="ps done">1</div><div class="pl done"></div>
+    <div class="ps done">2</div><div class="pl done"></div>
+    <div class="ps done">3</div><div class="pl done"></div>
+    <div class="ps active">4</div>
+  </div>
+
+  <h2 id="confirmTitle">Please Confirm</h2>
+  <p class="page-sub" id="confirmSub">Check all details before submitting.</p>
+  <div id="confirmContent" class="confirm-box" style="margin-bottom:14px"></div>
+  <button class="btn btn-gold" id="confirmBtn" onclick="submitForm()">✓ Confirm &amp; Submit</button>
+  <button class="btn btn-secondary" onclick="showPage('formPage')" id="editBtn">← Edit</button>
+</div>
+
+<div id="successPage" class="hidden">
+  <div class="success-wrap">
+    <div class="success-icon">✅</div>
+    <div class="success-title" id="successTitle">Submitted Successfully!</div>
+    <div class="success-sub" id="successSub">Your data has been recorded. Thank you.</div>
+  </div>
+  <button class="btn btn-primary" onclick="returnHome()" id="returnBtn">Submit Another</button>
+</div>
+
+<div id="adminLoginPage" class="hidden">
+  <h2>🔐 <span id="adminLoginTitle">Admin Login</span></h2>
+  <p class="page-sub">老板后台 — 请输入密码</p>
+  <div class="form-group" style="margin-top:16px">
+    <label>密码 / PIN</label>
+    <input type="password" id="adminPin" placeholder="••••" style="text-align:center;letter-spacing:.3em;font-size:24px">
+  </div>
+  <div id="adminError" class="error-msg"></div>
+  <button class="btn btn-primary" onclick="adminLogin()">进入后台</button>
+  <button class="btn btn-secondary" onclick="showPage('homePage')">返回 / Back</button>
+</div>
+
+<div id="adminPage" class="hidden">
+  <h2>老板后台 <span class="admin-tag">ADMIN</span></h2>
+  <p class="page-sub" id="adminGenerated">Loading...</p>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="num" id="kpiMissing">--</div><div class="lbl">今日未提交 Dips 站点</div></div>
+    <div class="kpi"><div class="num" id="kpiLowFuel">--</div><div class="lbl">最近低油量记录</div></div>
+  </div>
+
+  <button class="btn btn-primary" onclick="loadAdminData()">刷新数据</button>
+
+  <div class="admin-section-title">今日送油记录</div>
+  <div id="todayDelivery"></div>
+
+  <div class="admin-section-title">本周送油记录（按日期）</div>
+  <div id="weekDeliveryByDate"></div>
+
+  <div class="admin-section-title">本月送油记录（按日期）</div>
+  <div id="monthDeliveryByDate"></div>
+
+  <div class="admin-section-title">本周各站送油总量</div>
+  <div id="weekDeliveryTotal"></div>
+
+  <div class="admin-section-title">本月各站送油总量</div>
+  <div id="monthDeliveryTotal"></div>
+
+  <div class="admin-section-title">本周估算销量</div>
+  <div id="weekSales"></div>
+
+  <div class="admin-section-title">本月估算销量</div>
+  <div id="monthSales"></div>
+
+  <div class="admin-section-title">今日未提交 Fuel Dips 的站点</div>
+  <div id="missingDips"></div>
+
+  <div class="admin-section-title">最近低油量记录</div>
+  <div id="lowFuelRecords"></div>
+
+  <button class="btn btn-secondary" onclick="returnHome()">← 返回首页</button>
+</div>
+
+</div>
 </div>
 
 <script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwm1ud_vP4h9B3aNMwyJSwWPr2hmMC7OvhRwE9X31bJKIkJnq18M3heVufiBGdLx-MY/exec";
+const ADMIN_PIN = "8888";
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwm1ud_vP4h9B3aNMwyJSwWPr2hmMC7OvhRwE9X31bJKIkJnq18M3heVufiBGdLx-MY/exec";
+const STATION_WARNING_LEVELS = {
+  "Liberty Golden Square": 5000,
+  "BP Flemington": 8000,
+  "BP Clayton South": 8000
+};
+const DEFAULT_WARN_LEVEL = 10000;
 
-function today(){
-  return new Date().toISOString().split('T')[0];
+const stationProducts = {
+  "Sinopec Frankston": ["91","95","98","Diesel"],
+  "Sinopec Thomastown": ["91","E10","98","Diesel 1","Diesel 2"],
+  "Sinopec Shepparton": ["91","95","98","Diesel"],
+  "Sinopec Ballarat": ["91","95","98","Diesel"],
+  "BP Clayton South": ["91","95","98","Diesel"],
+  "BP Flemington": ["91","98","Diesel 1","Diesel 2"],
+  "Liberty Golden Square": ["91","E10","98","Diesel"]
+};
+
+const displayName = {
+  "91":"Unleaded 91",
+  "95":"Unleaded 95",
+  "98":"Premium 98",
+  "E10":"E10",
+  "Diesel":"Diesel",
+  "Diesel 1":"Diesel 1",
+  "Diesel 2":"Diesel 2"
+};
+
+const LANG = {
+  en:{
+    homeTitle:"Please Select",homeSub:"Choose what you would like to submit",
+    btnDips:"Fuel Dips",btnDipsDesc:"Daily tank readings",
+    btnDelivery:"Fuel Delivery",btnDeliveryDesc:"Record incoming fuel",
+    btnAdmin:"Admin",btnAdminDesc:"Owner dashboard",
+    stationTitle:"Select Station",stationSub:"Choose your station to continue",
+    stationLabel:"Station",stationPh:"— Please select —",
+    nextBtn:"Next →",backBtn1:"← Back",backBtn2:"← Back",editBtn:"← Edit",
+    formTitle_dip:"Fuel Dips",formTitle_del:"Fuel Delivery",
+    formSub_dip:"Fill in all tank readings.",formSub_del:"Fill in delivery details and quantities.",
+    lblDate:"Date",lblStaff:"Staff Name",lblSupplier:"Supplier",lblDocket:"Docket No.",
+    lblReadings_dip:"Tank Readings (Litres)",lblReadings_del:"Delivered Quantities (Litres)",
+    lblNotes:"Notes (optional)",reviewBtn:"Review & Confirm",
+    confirmTitle:"Please Confirm",confirmSub:"Check all details before submitting.",
+    confirmBtn:"✓ Confirm & Submit",submitting:"Submitting...",
+    successTitle:"Submitted Successfully!",successSub:"Your data has been recorded. Thank you.",
+    returnBtn:"Submit Another",
+    fuelSuffix_dip:" Dip Reading",fuelSuffix_del:" Delivered Litres",
+    err_station:"Please select a station.",err_date:"Please select a date.",
+    err_future:"Future dates are not allowed.",err_staff:"Please enter your name.",
+    err_supplier:"Please enter supplier.",err_docket:"Please enter docket number.",
+    err_fuel_dip:"All tank readings are required. Missing: ",
+    err_fuel_del:"Please enter at least one delivered fuel amount.",
+    err_negative:"Fuel values cannot be negative.",err_submit:"Submission failed. Please try again.",
+    field_type:"Type",field_station:"Station",field_date:"Date",field_staff:"Staff",
+    field_supplier:"Supplier",field_docket:"Docket",field_notes:"Notes",
+    type_dip:"Fuel Dips",type_del:"Fuel Delivery",
+    confirm_details:"Details",confirm_readings:"Fuel Data",warn_label:"⚠ LOW"
+  },
+  zh:{
+    homeTitle:"请选择",homeSub:"选择本次提交的内容",
+    btnDips:"油罐库存登记",btnDipsDesc:"填写各油罐当前油量",
+    btnDelivery:"送油登记",btnDeliveryDesc:"记录本次到油数量",
+    btnAdmin:"老板后台",btnAdminDesc:"查看统计数据",
+    stationTitle:"选择加油站",stationSub:"请先选择你所在的加油站",
+    stationLabel:"加油站",stationPh:"— 请选择 —",
+    nextBtn:"下一步 →",backBtn1:"← 返回",backBtn2:"← 返回",editBtn:"← 修改",
+    formTitle_dip:"油罐库存登记",formTitle_del:"送油登记",
+    formSub_dip:"请填写所有油罐油量。",formSub_del:"请填写送油详情及各油品数量。",
+    lblDate:"日期",lblStaff:"员工姓名",lblSupplier:"供应商",lblDocket:"送货单号",
+    lblReadings_dip:"各油罐油量（升）",lblReadings_del:"各油品送油量（升）",
+    lblNotes:"备注（选填）",reviewBtn:"确认提交",
+    confirmTitle:"请核对信息",confirmSub:"提交前请仔细检查以下内容。",
+    confirmBtn:"✓ 确认提交",submitting:"提交中...",
+    successTitle:"提交成功！",successSub:"数据已记录，谢谢。",
+    returnBtn:"返回重新提交",
+    fuelSuffix_dip:" 油量读数",fuelSuffix_del:" 送油量",
+    err_station:"请选择加油站。",err_date:"请选择日期。",
+    err_future:"不能选择未来日期。",err_staff:"请输入员工姓名。",
+    err_supplier:"请输入供应商。",err_docket:"请输入送货单号。",
+    err_fuel_dip:"油量登记要求所有油罐必须填写。缺少：",
+    err_fuel_del:"请至少填写一个油品的送油量。",
+    err_negative:"油量不能为负数。",err_submit:"提交失败，请重试。",
+    field_type:"类型",field_station:"加油站",field_date:"日期",field_staff:"员工",
+    field_supplier:"供应商",field_docket:"单号",field_notes:"备注",
+    type_dip:"油罐库存登记",type_del:"送油登记",
+    confirm_details:"基本信息",confirm_readings:"油量数据",warn_label:"⚠ 低油量"
+  }
+};
+
+let lang = localStorage.getItem("ap_lang") || "en";
+let selectedType = "";
+
+function t(k){return (LANG[lang]||LANG.en)[k]||k;}
+
+function localToday(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 }
 
-async function submitDip(){
+function setLang(l){
+  lang=l;
+  localStorage.setItem("ap_lang",l);
+  document.getElementById("btn-en").classList.toggle("active",l==="en");
+  document.getElementById("btn-zh").classList.toggle("active",l==="zh");
+  applyLang();
+}
 
-  const data = {
-    type:"fuel_dip",
-    date:today(),
-    station:document.getElementById("station").value,
-    staffName:document.getElementById("staffName").value,
-
-    "91":document.getElementById("f91").value,
-    "95":document.getElementById("f95").value,
-    "98":document.getElementById("f98").value,
-    "E10":document.getElementById("e10").value,
-    "Diesel":document.getElementById("diesel").value,
-    "Diesel 1":document.getElementById("diesel1").value,
-    "Diesel 2":document.getElementById("diesel2").value,
-
-    notes:document.getElementById("notes").value
-  };
-
-  const response = await fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify(data)
+function applyLang(){
+  [
+    "homeTitle","homeSub","btnDips","btnDipsDesc","btnDelivery","btnDeliveryDesc",
+    "btnAdmin","btnAdminDesc","stationTitle","stationSub","stationLabel","stationPh",
+    "nextBtn","backBtn1","backBtn2","editBtn","lblDate","lblStaff","lblSupplier",
+    "lblDocket","lblNotes","reviewBtn","confirmTitle","confirmSub","confirmBtn",
+    "successTitle","successSub","returnBtn"
+  ].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=t(id);
   });
 
-  const result = await response.json();
-
-  document.getElementById("dipResult").innerText =
-    result.success
-      ? "Fuel Dip Submitted Successfully"
-      : result.message;
+  if(selectedType){
+    const suf=selectedType==="fuel_dip"?"_dip":"_del";
+    document.getElementById("formTitle").textContent=t("formTitle"+suf);
+    document.getElementById("formSub").textContent=t("formSub"+suf);
+    document.getElementById("lblReadings").textContent=t("lblReadings"+suf);
+    const station=document.getElementById("station").value;
+    if(station)renderFuelInputs(station);
+  }
 }
 
-async function submitDelivery(){
+const PAGES=["homePage","stationPage","formPage","confirmPage","successPage","adminLoginPage","adminPage"];
+function showPage(id){
+  PAGES.forEach(p=>document.getElementById(p).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+}
 
-  const data = {
-    type:"fuel_delivery",
-    date:today(),
-    station:document.getElementById("station").value,
-    staffName:document.getElementById("staffName").value,
+function selectType(type){
+  selectedType=type;
+  showPage("stationPage");
+}
 
-    supplier:document.getElementById("supplier").value,
-    docketNo:document.getElementById("docket").value,
+function goToForm(){
+  const station=document.getElementById("station").value;
+  if(!station){showError(t("err_station"));return;}
 
-    "91":document.getElementById("d91").value,
-    "95":document.getElementById("d95").value,
-    "98":document.getElementById("d98").value,
-    "E10":document.getElementById("de10").value,
-    "Diesel 1":document.getElementById("ddiesel1").value,
-    "Diesel 2":document.getElementById("ddiesel2").value,
+  const suf=selectedType==="fuel_dip"?"_dip":"_del";
+  document.getElementById("formTitle").textContent=t("formTitle"+suf);
+  document.getElementById("formSub").textContent=t("formSub"+suf);
+  document.getElementById("lblReadings").textContent=t("lblReadings"+suf);
+  document.getElementById("deliveryFields").classList.toggle("hidden",selectedType!=="fuel_delivery");
+  document.getElementById("formError").classList.remove("show");
 
-    notes:document.getElementById("deliveryNotes").value
+  renderFuelInputs(station);
+  showPage("formPage");
+}
+
+function renderFuelInputs(station){
+  const products=stationProducts[station]||[];
+  const c=document.getElementById("fuelInputs");
+  c.innerHTML="";
+  const suffix=t(selectedType==="fuel_dip"?"fuelSuffix_dip":"fuelSuffix_del");
+
+  products.forEach(p=>{
+    const id="fuel_"+p.replace(/\s/g,"_");
+    c.innerHTML+=`
+      <div class="fuel-item">
+        <label>${displayName[p]||p}${suffix}</label>
+        <input type="number" id="${id}" min="0" step="1" inputmode="numeric" placeholder="0">
+        <div class="fuel-unit">Litres</div>
+      </div>
+    `;
+  });
+}
+
+function collectData(){
+  const station=document.getElementById("station").value;
+  const products=stationProducts[station]||[];
+
+  const data={
+    type:selectedType,
+    date:document.getElementById("date").value,
+    station,
+    staffName:document.getElementById("staffName").value.trim(),
+    notes:document.getElementById("notes").value.trim()
   };
 
-  const response = await fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify(data)
+  if(selectedType==="fuel_delivery"){
+    data.supplier=document.getElementById("supplier").value.trim();
+    data.docketNo=document.getElementById("docketNo").value.trim();
+  }
+
+  products.forEach(p=>{
+    const el=document.getElementById("fuel_"+p.replace(/\s/g,"_"));
+    data[p]=el?el.value:"";
   });
 
-  const result = await response.json();
-
-  document.getElementById("deliveryResult").innerText =
-    result.success
-      ? "Fuel Delivery Submitted Successfully"
-      : result.message;
+  return data;
 }
 
+function validateData(data){
+  const products=stationProducts[data.station]||[];
+
+  if(!data.station)return showError(t("err_station"));
+  if(!data.date)return showError(t("err_date"));
+  if(data.date>localToday())return showError(t("err_future"));
+  if(!data.staffName)return showError(t("err_staff"));
+
+  if(data.type==="fuel_delivery"){
+    if(!data.supplier)return showError(t("err_supplier"));
+    if(!data.docketNo)return showError(t("err_docket"));
+  }
+
+  for(const p of products){
+    if(data[p]!==""&&Number(data[p])<0)return showError(t("err_negative"));
+    if(data.type==="fuel_dip"&&data[p]==="")return showError(t("err_fuel_dip")+displayName[p]);
+  }
+
+  if(data.type==="fuel_delivery"&&!products.some(p=>data[p]!=="")){
+    return showError(t("err_fuel_del"));
+  }
+
+  document.getElementById("formError").classList.remove("show");
+  return true;
+}
+
+function showError(msg){
+  const el=document.getElementById("formError");
+  el.textContent=msg;
+  el.classList.add("show");
+  el.scrollIntoView({behavior:"smooth",block:"nearest"});
+  return false;
+}
+
+function getWarningLevel(station){
+  return STATION_WARNING_LEVELS[station]||DEFAULT_WARN_LEVEL;
+}
+
+function showConfirm(){
+  const data=collectData();
+  if(!validateData(data))return;
+
+  const products=stationProducts[data.station]||[];
+  const suf=data.type==="fuel_dip"?"_dip":"_del";
+  const warnLevel=getWarningLevel(data.station);
+
+  let html=`<div class="confirm-section">${t("confirm_details")}</div>`;
+
+  [
+    ["field_type",data.type==="fuel_dip"?t("type_dip"):t("type_del")],
+    ["field_station",data.station],
+    ["field_date",data.date],
+    ["field_staff",data.staffName],
+    ["field_supplier",data.supplier],
+    ["field_docket",data.docketNo],
+    ["field_notes",data.notes]
+  ].forEach(([k,v])=>{
+    if(v)html+=`<div class="confirm-row"><span class="ck">${t(k)}</span><span class="cv">${v}</span></div>`;
+  });
+
+  html+=`<div class="confirm-section">${t("confirm_readings")} (${t("lblReadings"+suf)})</div>`;
+
+  products.forEach(p=>{
+    const v=data[p];
+    if(v==="")return;
+    const isWarn=data.type==="fuel_dip"&&Number(v)<warnLevel;
+    html+=`
+      <div class="confirm-row">
+        <span class="ck">${displayName[p]||p}</span>
+        <span class="cv ${isWarn?"warn":""}">${Number(v).toLocaleString()} L${isWarn?" "+t("warn_label"):""}</span>
+      </div>
+    `;
+  });
+
+  document.getElementById("confirmContent").innerHTML=html;
+  document.getElementById("confirmBtn").textContent=t("confirmBtn");
+  showPage("confirmPage");
+}
+
+async function submitForm(){
+  const btn=document.getElementById("confirmBtn");
+  btn.disabled=true;
+  btn.textContent=t("submitting");
+
+  try{
+    const data=collectData();
+
+    const response=await fetch(WEBAPP_URL,{
+      method:"POST",
+      body:JSON.stringify(data)
+    });
+
+    const result=await response.json();
+
+    if(!result.success){
+      alert(result.message||t("err_submit"));
+      btn.disabled=false;
+      btn.textContent=t("confirmBtn");
+      return;
+    }
+
+    clearForm();
+    showPage("successPage");
+
+  }catch(err){
+    alert(t("err_submit"));
+  }
+
+  setTimeout(()=>{
+    btn.disabled=false;
+    btn.textContent=t("confirmBtn");
+  },3000);
+}
+
+function clearForm(){
+  ["staffName","supplier","docketNo","notes"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.value="";
+  });
+  document.getElementById("fuelInputs").innerHTML="";
+  document.getElementById("station").value="";
+  document.getElementById("date").value=localToday();
+  document.getElementById("formError").classList.remove("show");
+}
+
+function returnHome(){
+  selectedType="";
+  showPage("homePage");
+}
+
+function showAdminLogin(){
+  document.getElementById("adminPin").value="";
+  document.getElementById("adminError").classList.remove("show");
+  showPage("adminLoginPage");
+}
+
+function adminLogin(){
+  const pin=document.getElementById("adminPin").value;
+  if(pin!==ADMIN_PIN){
+    const el=document.getElementById("adminError");
+    el.textContent=lang==="zh"?"密码错误，请重试。":"Incorrect PIN. Please try again.";
+    el.classList.add("show");
+    document.getElementById("adminPin").value="";
+    return;
+  }
+  showPage("adminPage");
+  loadAdminData();
+}
+
+document.getElementById("adminPin").addEventListener("keydown",e=>{
+  if(e.key==="Enter")adminLogin();
+});
+
+async function loadAdminData(){
+  setAdminLoading();
+
+  try{
+    const response=await fetch(WEBAPP_URL+"?action=admin");
+    const json=await response.json();
+
+    if(!json.success){
+      throw new Error(json.message||"Failed");
+    }
+
+    renderAdmin(json.data);
+  }catch(err){
+    document.getElementById("todayDelivery").innerHTML=`<div class="admin-item">Admin data failed to load.</div>`;
+  }
+}
+
+function setAdminLoading(){
+  ["todayDelivery","weekDeliveryByDate","monthDeliveryByDate","weekDeliveryTotal","monthDeliveryTotal","weekSales","monthSales","missingDips","lowFuelRecords"].forEach(id=>{
+    document.getElementById(id).innerHTML=`<div class="admin-item">Loading...</div>`;
+  });
+}
+
+function renderAdmin(data){
+  document.getElementById("adminGenerated").textContent=`Generated: ${formatDateTime(data.generatedAt)}`;
+  document.getElementById("kpiMissing").textContent=(data.missingDipsToday||[]).length;
+  document.getElementById("kpiLowFuel").textContent=(data.lowFuelRecords||[]).length;
+
+  document.getElementById("todayDelivery").innerHTML=renderDeliveryByDate(data.todayDeliveryByDate);
+  document.getElementById("weekDeliveryByDate").innerHTML=renderDeliveryByDate(data.weekDeliveryByDate);
+  document.getElementById("monthDeliveryByDate").innerHTML=renderDeliveryByDate(data.monthDeliveryByDate);
+
+  document.getElementById("weekDeliveryTotal").innerHTML=renderStationTotals(data.weekDeliveryTotalByStation);
+  document.getElementById("monthDeliveryTotal").innerHTML=renderStationTotals(data.monthDeliveryTotalByStation);
+
+  document.getElementById("weekSales").innerHTML=renderSales(data.weekEstimatedSales);
+  document.getElementById("monthSales").innerHTML=renderSales(data.monthEstimatedSales);
+
+  document.getElementById("missingDips").innerHTML=renderMissing(data.missingDipsToday);
+  document.getElementById("lowFuelRecords").innerHTML=renderLowFuel(data.lowFuelRecords);
+}
+
+function renderDeliveryByDate(obj){
+  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">No records.</div>`;
+
+  let html="";
+  Object.keys(obj).sort().reverse().forEach(date=>{
+    html+=`<div class="admin-date">${date}</div>`;
+    Object.keys(obj[date]).sort().forEach(st=>{
+      html+=renderFuelItem(st,obj[date][st]);
+    });
+  });
+  return html;
+}
+
+function renderStationTotals(obj){
+  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">No records.</div>`;
+  let html="";
+  Object.keys(obj).sort().forEach(st=>{
+    html+=renderFuelItem(st,obj[st]);
+  });
+  return html;
+}
+
+function renderSales(obj){
+  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">No records.</div>`;
+  let html="";
+  Object.keys(obj).sort().forEach(st=>{
+    const s=obj[st];
+    html+=`
+      <div class="admin-item">
+        <div class="admin-station">${st}</div>
+        91: ${fmt(s["91"])} L<br>
+        95: ${fmt(s["95"])} L<br>
+        98: ${fmt(s["98"])} L<br>
+        E10: ${fmt(s["E10"])} L<br>
+        Diesel Total: ${fmt(s["Diesel"])} L<br>
+        Total: ${fmt(s["Total"])} L<br>
+        Delivery Cost: $${fmtMoney(s["Delivery Cost $"])}
+      </div>
+    `;
+  });
+  return html;
+}
+
+function renderFuelItem(st,s){
+  return `
+    <div class="admin-item">
+      <div class="admin-station">${st}</div>
+      91: ${fmt(s["91"])} L<br>
+      95: ${fmt(s["95"])} L<br>
+      98: ${fmt(s["98"])} L<br>
+      E10: ${fmt(s["E10"])} L<br>
+      Diesel Total: ${fmt(s["Diesel"])} L<br>
+      Total: ${fmt(s["Total"])} L
+    </div>
+  `;
+}
+
+function renderMissing(arr){
+  if(!arr||arr.length===0)return `<div class="admin-item">All stations submitted Fuel Dips today.</div>`;
+  return arr.map(st=>`<div class="admin-item">⚠ ${st}</div>`).join("");
+}
+
+function renderLowFuel(arr){
+  if(!arr||arr.length===0)return `<div class="admin-item">No low fuel records.</div>`;
+  return arr.map(r=>`
+    <div class="admin-item">
+      <div class="admin-station">${r.station}</div>
+      Date: ${r.date}<br>
+      Staff: ${r.staffName||"-"}<br>
+      Warning: ${r.warning}
+    </div>
+  `).join("");
+}
+
+function fmt(n){
+  return Number(n||0).toLocaleString();
+}
+
+function fmtMoney(n){
+  return Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function formatDateTime(v){
+  try{return new Date(v).toLocaleString();}
+  catch(e){return String(v||"");}
+}
+
+document.getElementById("date").value=localToday();
+document.getElementById("date").max=localToday();
+setLang(lang);
 </script>
 
 </body>
