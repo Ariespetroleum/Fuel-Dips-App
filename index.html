@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aries Petroleum — Fuel System</title>
+
 <style>
 :root{
   --navy:#0f1f3d;
@@ -53,6 +54,7 @@ textarea{min-height:80px;resize:vertical}
 .type-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
 .type-icon.dip{background:#e8f4fd}
 .type-icon.del{background:#fef3e2}
+.type-icon.cost{background:#fff7ed}
 .type-icon.adm{background:#f0fdf4}
 .t-label{font-size:16px;font-weight:700;color:#1a1a1a}
 .t-desc{font-size:12px;color:#aaa;margin-top:2px}
@@ -74,8 +76,6 @@ textarea{min-height:80px;resize:vertical}
 .success-icon{font-size:60px;margin-bottom:14px}
 .success-title{font-size:22px;font-weight:700;color:var(--success);margin-bottom:6px}
 .success-sub{font-size:14px;color:var(--muted)}
-.admin-box{background:#f9fafb;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;line-height:1.7;font-size:14px}
-.admin-box b{color:var(--navy)}
 .admin-tag{display:inline-block;background:var(--navy);color:var(--gold);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.06em;vertical-align:middle;margin-left:6px}
 .admin-section-title{font-size:15px;font-weight:800;color:var(--navy);margin:18px 0 8px}
 .admin-item{background:white;border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px;line-height:1.6}
@@ -93,6 +93,7 @@ textarea{min-height:80px;resize:vertical}
 }
 </style>
 </head>
+
 <body>
 
 <div class="header">
@@ -111,14 +112,22 @@ textarea{min-height:80px;resize:vertical}
 <div id="homePage">
   <h2 id="homeTitle">Please Select</h2>
   <p class="page-sub" id="homeSub">Choose what you would like to submit</p>
+
   <button class="type-btn" onclick="selectType('fuel_dip')">
     <div class="type-icon dip">📊</div>
     <div><div class="t-label" id="btnDips">Fuel Dips</div><div class="t-desc" id="btnDipsDesc">Daily tank readings</div></div>
   </button>
+
   <button class="type-btn" onclick="selectType('fuel_delivery')">
     <div class="type-icon del">🚛</div>
     <div><div class="t-label" id="btnDelivery">Fuel Delivery</div><div class="t-desc" id="btnDeliveryDesc">Record incoming fuel</div></div>
   </button>
+
+  <button class="type-btn" onclick="showManagerLogin()">
+    <div class="type-icon cost">💰</div>
+    <div><div class="t-label" id="btnManagerCost">Manager Fuel Cost</div><div class="t-desc" id="btnManagerCostDesc">Enter BP / Liberty cost price</div></div>
+  </button>
+
   <button class="type-btn" onclick="showAdminLogin()">
     <div class="type-icon adm">🔐</div>
     <div><div class="t-label" id="btnAdmin">Admin</div><div class="t-desc" id="btnAdminDesc">Owner dashboard</div></div>
@@ -196,6 +205,70 @@ textarea{min-height:80px;resize:vertical}
   <button class="btn btn-secondary" onclick="showPage('stationPage')" id="backBtn2">← Back</button>
 </div>
 
+<div id="managerLoginPage" class="hidden">
+  <h2>🔐 Manager Fuel Cost</h2>
+  <p class="page-sub">Please enter manager PIN</p>
+  <div class="form-group" style="margin-top:16px">
+    <label>Manager PIN</label>
+    <input type="password" id="managerPinInput" placeholder="••••" style="text-align:center;letter-spacing:.3em;font-size:24px">
+  </div>
+  <div id="managerError" class="error-msg"></div>
+  <button class="btn btn-primary" id="managerLoginBtn" onclick="managerLogin()">Enter</button>
+  <button class="btn btn-secondary" onclick="showPage('homePage')">Back</button>
+</div>
+
+<div id="managerCostPage" class="hidden">
+  <h2>Manager Fuel Cost</h2>
+  <p class="page-sub">Enter BP / Liberty daily fuel cost price</p>
+
+  <div class="form-group">
+    <label>日期 / Date</label>
+    <input type="date" id="costDate">
+  </div>
+
+  <div class="form-group">
+    <label>Source</label>
+    <select id="costSource">
+      <option value="">— Please select —</option>
+      <option value="BP">BP</option>
+      <option value="Viva">Liberty / Viva</option>
+    </select>
+  </div>
+
+  <div class="fuel-grid">
+    <div class="fuel-item">
+      <label>91 Cost c/L</label>
+      <input type="number" id="cost91" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+    </div>
+    <div class="fuel-item">
+      <label>95 Cost c/L</label>
+      <input type="number" id="cost95" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+    </div>
+    <div class="fuel-item">
+      <label>98 Cost c/L</label>
+      <input type="number" id="cost98" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+    </div>
+    <div class="fuel-item">
+      <label>E10 Cost c/L</label>
+      <input type="number" id="costE10" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+    </div>
+    <div class="fuel-item">
+      <label>Diesel Cost c/L</label>
+      <input type="number" id="costDiesel" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+    </div>
+  </div>
+
+  <div class="form-group" style="margin-top:18px">
+    <label>Notes</label>
+    <textarea id="costNotes"></textarea>
+  </div>
+
+  <div id="costError" class="error-msg"></div>
+
+  <button class="btn btn-primary" id="costSubmitBtn" onclick="submitFuelCost()">Save Fuel Cost</button>
+  <button class="btn btn-secondary" onclick="returnHome()">Back Home</button>
+</div>
+
 <div id="confirmPage" class="hidden">
   <div class="progress">
     <div class="ps done">1</div><div class="pl done"></div>
@@ -217,7 +290,7 @@ textarea{min-height:80px;resize:vertical}
     <div class="success-title" id="successTitle">Submitted Successfully!</div>
     <div class="success-sub" id="successSub">Your data has been recorded. Thank you.</div>
   </div>
-  <button class="btn btn-primary" onclick="returnHome()" id="returnBtn">Submit Another</button>
+  <button class="btn btn-primary" onclick="returnHome()" id="returnBtn">Return Home</button>
 </div>
 
 <div id="adminLoginPage" class="hidden">
@@ -228,7 +301,7 @@ textarea{min-height:80px;resize:vertical}
     <input type="password" id="adminPin" placeholder="••••" style="text-align:center;letter-spacing:.3em;font-size:24px">
   </div>
   <div id="adminError" class="error-msg"></div>
-  <button class="btn btn-primary" onclick="adminLogin()">进入后台</button>
+  <button class="btn btn-primary" id="adminLoginBtn" onclick="adminLogin()">进入后台</button>
   <button class="btn btn-secondary" onclick="showPage('homePage')">返回 / Back</button>
 </div>
 
@@ -264,6 +337,9 @@ textarea{min-height:80px;resize:vertical}
   <div class="admin-section-title">本月估算销量</div>
   <div id="monthSales"></div>
 
+  <div class="admin-section-title">⚠️ 今日缺失油价</div>
+  <div id="missingCostToday"></div>
+
   <div class="admin-section-title">今日未提交 Fuel Dips 的站点</div>
   <div id="missingDips"></div>
 
@@ -278,7 +354,6 @@ textarea{min-height:80px;resize:vertical}
 
 <script>
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwm1ud_vP4h9B3aNMwyJSwWPr2hmMC7OvhRwE9X31bJKIkJnq18M3heVufiBGdLx-MY/exec";
-const ADMIN_PIN = "8888";
 
 const STATION_WARNING_LEVELS = {
   "Liberty Golden Square": 5000,
@@ -307,11 +382,17 @@ const displayName = {
   "Diesel 2":"Diesel 2"
 };
 
+let lang = localStorage.getItem("ap_lang") || "en";
+let selectedType = "";
+let adminPin = "";
+let managerPin = "";
+
 const LANG = {
   en:{
     homeTitle:"Please Select",homeSub:"Choose what you would like to submit",
     btnDips:"Fuel Dips",btnDipsDesc:"Daily tank readings",
     btnDelivery:"Fuel Delivery",btnDeliveryDesc:"Record incoming fuel",
+    btnManagerCost:"Manager Fuel Cost",btnManagerCostDesc:"Enter BP / Liberty cost price",
     btnAdmin:"Admin",btnAdminDesc:"Owner dashboard",
     stationTitle:"Select Station",stationSub:"Choose your station to continue",
     stationLabel:"Station",stationPh:"— Please select —",
@@ -324,7 +405,7 @@ const LANG = {
     confirmTitle:"Please Confirm",confirmSub:"Check all details before submitting.",
     confirmBtn:"✓ Confirm & Submit",submitting:"Submitting...",
     successTitle:"Submitted Successfully!",successSub:"Your data has been recorded. Thank you.",
-    returnBtn:"Submit Another",
+    returnBtn:"Return Home",
     fuelSuffix_dip:" Dip Reading",fuelSuffix_del:" Delivered Litres",
     err_station:"Please select a station.",err_date:"Please select a date.",
     err_future:"Future dates are not allowed.",err_staff:"Please enter your name.",
@@ -341,6 +422,7 @@ const LANG = {
     homeTitle:"请选择",homeSub:"选择本次提交的内容",
     btnDips:"油罐库存登记",btnDipsDesc:"填写各油罐当前油量",
     btnDelivery:"送油登记",btnDeliveryDesc:"记录本次到油数量",
+    btnManagerCost:"经理油价录入",btnManagerCostDesc:"录入 BP / Liberty 进货价",
     btnAdmin:"老板后台",btnAdminDesc:"查看统计数据",
     stationTitle:"选择加油站",stationSub:"请先选择你所在的加油站",
     stationLabel:"加油站",stationPh:"— 请选择 —",
@@ -353,7 +435,7 @@ const LANG = {
     confirmTitle:"请核对信息",confirmSub:"提交前请仔细检查以下内容。",
     confirmBtn:"✓ 确认提交",submitting:"提交中...",
     successTitle:"提交成功！",successSub:"数据已记录，谢谢。",
-    returnBtn:"返回重新提交",
+    returnBtn:"返回首页",
     fuelSuffix_dip:" 油量读数",fuelSuffix_del:" 送油量",
     err_station:"请选择加油站。",err_date:"请选择日期。",
     err_future:"不能选择未来日期。",err_staff:"请输入员工姓名。",
@@ -367,9 +449,6 @@ const LANG = {
     confirm_details:"基本信息",confirm_readings:"油量数据",warn_label:"⚠ 低油量"
   }
 };
-
-let lang = localStorage.getItem("ap_lang") || "en";
-let selectedType = "";
 
 function t(k){return (LANG[lang]||LANG.en)[k]||k;}
 
@@ -389,7 +468,8 @@ function setLang(l){
 function applyLang(){
   [
     "homeTitle","homeSub","btnDips","btnDipsDesc","btnDelivery","btnDeliveryDesc",
-    "btnAdmin","btnAdminDesc","stationTitle","stationSub","stationLabel","stationPh",
+    "btnManagerCost","btnManagerCostDesc","btnAdmin","btnAdminDesc",
+    "stationTitle","stationSub","stationLabel","stationPh",
     "nextBtn","backBtn1","backBtn2","editBtn","lblDate","lblStaff","lblSupplier",
     "lblDocket","lblNotes","reviewBtn","confirmTitle","confirmSub","confirmBtn",
     "successTitle","successSub","returnBtn"
@@ -400,15 +480,21 @@ function applyLang(){
 
   if(selectedType){
     const suf=selectedType==="fuel_dip"?"_dip":"_del";
-    document.getElementById("formTitle").textContent=t("formTitle"+suf);
-    document.getElementById("formSub").textContent=t("formSub"+suf);
-    document.getElementById("lblReadings").textContent=t("lblReadings"+suf);
-    const station=document.getElementById("station").value;
-    if(station)renderFuelInputs(station);
+    const title=document.getElementById("formTitle");
+    const sub=document.getElementById("formSub");
+    const readings=document.getElementById("lblReadings");
+    if(title) title.textContent=t("formTitle"+suf);
+    if(sub) sub.textContent=t("formSub"+suf);
+    if(readings) readings.textContent=t("lblReadings"+suf);
+    updateFuelLabelsOnly();
   }
 }
 
-const PAGES=["homePage","stationPage","formPage","confirmPage","successPage","adminLoginPage","adminPage"];
+const PAGES=[
+  "homePage","stationPage","formPage","confirmPage","successPage",
+  "adminLoginPage","adminPage","managerLoginPage","managerCostPage"
+];
+
 function showPage(id){
   PAGES.forEach(p=>document.getElementById(p).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
@@ -421,7 +507,10 @@ function selectType(type){
 
 function goToForm(){
   const station=document.getElementById("station").value;
-  if(!station){showError(t("err_station"));return;}
+  if(!station){
+    alert(t("err_station"));
+    return;
+  }
 
   const suf=selectedType==="fuel_dip"?"_dip":"_del";
   document.getElementById("formTitle").textContent=t("formTitle"+suf);
@@ -443,12 +532,26 @@ function renderFuelInputs(station){
   products.forEach(p=>{
     const id="fuel_"+p.replace(/\s/g,"_");
     c.innerHTML+=`
-      <div class="fuel-item">
-        <label>${displayName[p]||p}${suffix}</label>
+      <div class="fuel-item" data-product="${p}">
+        <label id="label_${id}">${displayName[p]||p}${suffix}</label>
         <input type="number" id="${id}" min="0" step="1" inputmode="numeric" placeholder="0">
         <div class="fuel-unit">Litres</div>
       </div>
     `;
+  });
+}
+
+function updateFuelLabelsOnly(){
+  const station=document.getElementById("station").value;
+  if(!station)return;
+
+  const products=stationProducts[station]||[];
+  const suffix=t(selectedType==="fuel_dip"?"fuelSuffix_dip":"fuelSuffix_del");
+
+  products.forEach(p=>{
+    const id="fuel_"+p.replace(/\s/g,"_");
+    const label=document.getElementById("label_"+id);
+    if(label) label.textContent=(displayName[p]||p)+suffix;
   });
 }
 
@@ -580,15 +683,15 @@ async function submitForm(){
 
     clearForm();
     showPage("successPage");
+    btn.disabled=false;
+    btn.textContent=t("confirmBtn");
+    return;
 
   }catch(err){
     alert(t("err_submit"));
-  }
-
-  setTimeout(()=>{
     btn.disabled=false;
     btn.textContent=t("confirmBtn");
-  },3000);
+  }
 }
 
 function clearForm(){
@@ -607,37 +710,282 @@ function returnHome(){
   showPage("homePage");
 }
 
+function showManagerLogin(){
+  managerPin="";
+  document.getElementById("managerPinInput").value="";
+  document.getElementById("managerError").classList.remove("show");
+  showPage("managerLoginPage");
+}
+
+async function managerLogin(){
+  const pin=document.getElementById("managerPinInput").value.trim();
+
+  if(!pin){
+    const el=document.getElementById("managerError");
+    el.textContent=lang==="zh"?"请输入密码。":"Please enter PIN.";
+    el.classList.add("show");
+    return;
+  }
+
+  const btn=document.getElementById("managerLoginBtn");
+
+  btn.disabled=true;
+  btn.textContent=lang==="zh"?"验证中...":"Verifying...";
+
+  try{
+    const response=await fetch(
+      WEBAPP_URL+
+      "?action=verifyManager&pin="+
+      encodeURIComponent(pin)
+    );
+
+    const result=await response.json();
+
+    if(!result.success){
+      const el=document.getElementById("managerError");
+      el.textContent=lang==="zh"?"密码错误，请重试。":"Incorrect PIN. Please try again.";
+      el.classList.add("show");
+      document.getElementById("managerPinInput").value="";
+      return;
+    }
+
+    managerPin=pin;
+    document.getElementById("costDate").value=localToday();
+    document.getElementById("costDate").max=localToday();
+    document.getElementById("managerError").classList.remove("show");
+    showPage("managerCostPage");
+
+  }catch(err){
+    const el=document.getElementById("managerError");
+    el.textContent=lang==="zh"?"验证失败，请重试。":"Verification failed. Please try again.";
+    el.classList.add("show");
+
+  }finally{
+    btn.disabled=false;
+    btn.textContent=lang==="zh"?"进入":"Enter";
+  }
+}
+
+async function submitFuelCost(){
+  if(!managerPin){
+    showPage("managerLoginPage");
+    const el=document.getElementById("managerError");
+    el.textContent=lang==="zh"
+      ?"登录已过期，请重新输入密码。"
+      :"Session expired. Please enter PIN again.";
+    el.classList.add("show");
+    return;
+  }
+
+  const data={
+    type:"fuel_cost",
+    managerPin:managerPin,
+    date:document.getElementById("costDate").value,
+    source:document.getElementById("costSource").value,
+    "91":document.getElementById("cost91").value,
+    "95":document.getElementById("cost95").value,
+    "98":document.getElementById("cost98").value,
+    "E10":document.getElementById("costE10").value,
+    "Diesel":document.getElementById("costDiesel").value,
+    notes:document.getElementById("costNotes").value.trim()
+  };
+
+  if(!data.date)return showCostError(lang==="zh"?"请选择日期。":"Please select date.");
+  if(data.date>localToday())return showCostError(lang==="zh"?"不能选择未来日期。":"Future date is not allowed.");
+  if(!data.source)return showCostError(lang==="zh"?"请选择供应商。":"Please select source.");
+
+  const priceFields=["91","95","98","E10","Diesel"];
+  let hasPrice=false;
+
+  for(const p of priceFields){
+    if(data[p]!==""&&Number(data[p])<0){
+      return showCostError(lang==="zh"?"价格不能为负数。":"Price cannot be negative.");
+    }
+    if(data[p]!=="")hasPrice=true;
+  }
+
+  if(!hasPrice)return showCostError(lang==="zh"?"请至少填写一个价格。":"Please enter at least one price.");
+
+  const btn=document.getElementById("costSubmitBtn");
+  btn.disabled=true;
+  btn.textContent=lang==="zh"?"保存中...":"Saving...";
+  document.getElementById("costError").classList.remove("show");
+
+  try{
+    const response=await fetch(WEBAPP_URL,{
+      method:"POST",
+      body:JSON.stringify(data)
+    });
+
+    const result=await response.json();
+
+    if(!result.success){
+      if(result.message==="Unauthorised."){
+        managerPin="";
+        showPage("managerLoginPage");
+        const el=document.getElementById("managerError");
+        el.textContent=lang==="zh"?"密码错误，请重试。":"Incorrect PIN. Please try again.";
+        el.classList.add("show");
+        return;
+      }
+      return showCostError(result.message||"Submit failed.");
+    }
+
+    managerPin="";
+    clearCostForm();
+    showPage("successPage");
+
+  }catch(err){
+    showCostError(lang==="zh"?"提交失败，请重试。":"Submit failed. Please try again.");
+  }finally{
+    btn.disabled=false;
+    btn.textContent=lang==="zh"?"保存油价":"Save Fuel Cost";
+  }
+}
+
+function showCostError(msg){
+  const el=document.getElementById("costError");
+  el.textContent=msg;
+  el.classList.add("show");
+  return false;
+}
+
+function clearCostForm(){
+  ["cost91","cost95","cost98","costE10","costDiesel","costNotes"].forEach(id=>{
+    document.getElementById(id).value="";
+  });
+  document.getElementById("costError").classList.remove("show");
+}
+
 function showAdminLogin(){
+  adminPin="";
   document.getElementById("adminPin").value="";
   document.getElementById("adminError").classList.remove("show");
   showPage("adminLoginPage");
 }
 
-function adminLogin(){
-  const pin=document.getElementById("adminPin").value;
-  if(pin!==ADMIN_PIN){
+async function adminLogin(){
+
+  const pin=document.getElementById("adminPin").value.trim();
+
+  if(!pin){
+
     const el=document.getElementById("adminError");
-    el.textContent=lang==="zh"?"密码错误，请重试。":"Incorrect PIN. Please try again.";
+
+    el.textContent =
+      lang==="zh"
+        ?"请输入密码。"
+        :"Please enter PIN.";
+
     el.classList.add("show");
-    document.getElementById("adminPin").value="";
+
     return;
   }
-  showPage("adminPage");
-  loadAdminData();
+
+  const btn=document.getElementById("adminLoginBtn");
+
+  btn.disabled = true;
+
+  btn.textContent =
+    lang==="zh"
+      ?"验证中..."
+      :"Verifying...";
+
+  try{
+
+    const response = await fetch(
+      WEBAPP_URL +
+      "?action=verifyAdmin&pin=" +
+      encodeURIComponent(pin)
+    );
+
+    const result = await response.json();
+
+    if(!result.success){
+
+      const el=document.getElementById("adminError");
+
+      el.textContent =
+        lang==="zh"
+          ?"密码错误，请重试。"
+          :"Incorrect PIN. Please try again.";
+
+      el.classList.add("show");
+
+      document.getElementById("adminPin").value="";
+
+      return;
+    }
+
+    adminPin = pin;
+
+    document.getElementById("adminError")
+      .classList.remove("show");
+
+    showPage("adminPage");
+
+    await loadAdminData();
+
+  }catch(err){
+
+    const el=document.getElementById("adminError");
+
+    el.textContent =
+      lang==="zh"
+        ?"验证失败，请重试。"
+        :"Verification failed. Please try again.";
+
+    el.classList.add("show");
+
+  }finally{
+
+    btn.disabled = false;
+
+    btn.textContent =
+      lang==="zh"
+        ?"进入后台"
+        :"Enter Admin";
+  }
 }
 
 document.getElementById("adminPin").addEventListener("keydown",e=>{
   if(e.key==="Enter")adminLogin();
 });
 
+document.getElementById("managerPinInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter")managerLogin();
+});
+
 async function loadAdminData(){
+  if(!adminPin){
+    showPage("adminLoginPage");
+    const el=document.getElementById("adminError");
+    el.textContent=lang==="zh"?"登录已过期，请重新输入密码。":"Session expired. Please enter PIN again.";
+    el.classList.add("show");
+    return;
+  }
+
   setAdminLoading();
 
   try{
-    const response=await fetch(WEBAPP_URL+"?action=admin");
+    const response=await fetch(
+      WEBAPP_URL+
+      "?action=admin&pin="+
+      encodeURIComponent(adminPin)
+    );
+
     const json=await response.json();
 
     if(!json.success){
+      if(json.message==="Invalid admin PIN."){
+        showPage("adminLoginPage");
+        adminPin="";
+        document.getElementById("adminPin").value="";
+        const el=document.getElementById("adminError");
+        el.textContent=lang==="zh"?"密码错误，请重试。":"Incorrect PIN. Please try again.";
+        el.classList.add("show");
+        return;
+      }
       throw new Error(json.message||"Failed");
     }
 
@@ -648,7 +996,11 @@ async function loadAdminData(){
 }
 
 function setAdminLoading(){
-  ["todayDelivery","weekDeliveryByDate","monthDeliveryByDate","weekDeliveryTotal","monthDeliveryTotal","weekSales","monthSales","missingDips","lowFuelRecords"].forEach(id=>{
+  [
+    "todayDelivery","weekDeliveryByDate","monthDeliveryByDate",
+    "weekDeliveryTotal","monthDeliveryTotal","weekSales","monthSales",
+    "missingDips","lowFuelRecords","missingCostToday"
+  ].forEach(id=>{
     document.getElementById(id).innerHTML=`<div class="admin-item">Loading...</div>`;
   });
 }
@@ -668,12 +1020,13 @@ function renderAdmin(data){
   document.getElementById("weekSales").innerHTML=renderSales(data.weekEstimatedSales);
   document.getElementById("monthSales").innerHTML=renderSales(data.monthEstimatedSales);
 
+  document.getElementById("missingCostToday").innerHTML=renderMissingCost(data.missingCostToday);
   document.getElementById("missingDips").innerHTML=renderMissing(data.missingDipsToday);
   document.getElementById("lowFuelRecords").innerHTML=renderLowFuel(data.lowFuelRecords);
 }
 
 function renderDeliveryByDate(obj){
-  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">No records.</div>`;
+  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">${lang==="zh"?"暂无记录。":"No records."}</div>`;
 
   let html="";
   Object.keys(obj).sort().reverse().forEach(date=>{
@@ -686,7 +1039,7 @@ function renderDeliveryByDate(obj){
 }
 
 function renderStationTotals(obj){
-  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">No records.</div>`;
+  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">${lang==="zh"?"暂无记录。":"No records."}</div>`;
   let html="";
   Object.keys(obj).sort().forEach(st=>{
     html+=renderFuelItem(st,obj[st]);
@@ -695,20 +1048,20 @@ function renderStationTotals(obj){
 }
 
 function renderSales(obj){
-  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">No records.</div>`;
+  if(!obj||Object.keys(obj).length===0)return `<div class="admin-item">${lang==="zh"?"暂无记录。":"No records."}</div>`;
   let html="";
   Object.keys(obj).sort().forEach(st=>{
     const s=obj[st];
     html+=`
       <div class="admin-item">
         <div class="admin-station">${st}</div>
-        91: ${fmt(s["91"])} L<br>
-        95: ${fmt(s["95"])} L<br>
-        98: ${fmt(s["98"])} L<br>
-        E10: ${fmt(s["E10"])} L<br>
-        Diesel Total: ${fmt(s["Diesel"])} L<br>
-        Total: ${fmt(s["Total"])} L<br>
-        Delivery Cost: $${fmtMoney(s["Delivery Cost $"])}
+        ${fuelLabel("91")}: ${fmt(s["91"])} L<br>
+        ${fuelLabel("95")}: ${fmt(s["95"])} L<br>
+        ${fuelLabel("98")}: ${fmt(s["98"])} L<br>
+        ${fuelLabel("E10")}: ${fmt(s["E10"])} L<br>
+        ${fuelLabel("Diesel")}: ${fmt(s["Diesel"])} L<br>
+        ${lang==="zh"?"合计":"Total"}: ${fmt(s["Total"])} L<br>
+        ${deliveryCostLabel()}: $${fmtMoney(s["Delivery Cost $"])}
       </div>
     `;
   });
@@ -719,31 +1072,60 @@ function renderFuelItem(st,s){
   return `
     <div class="admin-item">
       <div class="admin-station">${st}</div>
-      91: ${fmt(s["91"])} L<br>
-      95: ${fmt(s["95"])} L<br>
-      98: ${fmt(s["98"])} L<br>
-      E10: ${fmt(s["E10"])} L<br>
-      Diesel Total: ${fmt(s["Diesel"])} L<br>
-      Total: ${fmt(s["Total"])} L
+      ${fuelLabel("91")}: ${fmt(s["91"])} L<br>
+      ${fuelLabel("95")}: ${fmt(s["95"])} L<br>
+      ${fuelLabel("98")}: ${fmt(s["98"])} L<br>
+      ${fuelLabel("E10")}: ${fmt(s["E10"])} L<br>
+      ${fuelLabel("Diesel")}: ${fmt(s["Diesel"])} L<br>
+      ${lang==="zh"?"合计":"Total"}: ${fmt(s["Total"])} L
     </div>
   `;
 }
 
+function renderMissingCost(arr){
+  if(!arr||arr.length===0){
+    return `<div class="admin-item">${lang==="zh"?"✅ 今日油价已全部录入。":"✅ All cost prices entered today."}</div>`;
+  }
+  return arr.map(s=>
+    `<div class="admin-item" style="color:var(--danger);font-weight:600">⚠ ${s}</div>`
+  ).join("");
+}
+
 function renderMissing(arr){
-  if(!arr||arr.length===0)return `<div class="admin-item">All stations submitted Fuel Dips today.</div>`;
+  if(!arr||arr.length===0)return `<div class="admin-item">${lang==="zh"?"所有站点今日已提交 Fuel Dips。":"All stations submitted Fuel Dips today."}</div>`;
   return arr.map(st=>`<div class="admin-item">⚠ ${st}</div>`).join("");
 }
 
 function renderLowFuel(arr){
-  if(!arr||arr.length===0)return `<div class="admin-item">No low fuel records.</div>`;
+  if(!arr||arr.length===0)return `<div class="admin-item">${lang==="zh"?"暂无低油量记录。":"No low fuel records."}</div>`;
   return arr.map(r=>`
     <div class="admin-item">
       <div class="admin-station">${r.station}</div>
-      Date: ${r.date}<br>
-      Staff: ${r.staffName||"-"}<br>
-      Warning: ${r.warning}
+      ${lang==="zh"?"日期":"Date"}: ${r.date}<br>
+      ${lang==="zh"?"员工":"Staff"}: ${r.staffName||"-"}<br>
+      ${lang==="zh"?"预警内容":"Warning"}: ${r.warning}
     </div>
   `).join("");
+}
+
+function fuelLabel(p){
+  if(lang==="zh"){
+    const map={
+      "91":"91号汽油",
+      "95":"95号汽油",
+      "98":"98号汽油",
+      "E10":"E10",
+      "Diesel":"柴油",
+      "Diesel 1":"柴油 1",
+      "Diesel 2":"柴油 2"
+    };
+    return map[p]||p;
+  }
+  return p;
+}
+
+function deliveryCostLabel(){
+  return lang==="zh"?"送油成本":"Delivery Cost";
 }
 
 function fmt(n){
@@ -761,6 +1143,7 @@ function formatDateTime(v){
 
 document.getElementById("date").value=localToday();
 document.getElementById("date").max=localToday();
+
 setLang(lang);
 </script>
 
